@@ -14,9 +14,9 @@
     },
     "rules": {
       "no-unused-vars":"warn",
-      "no-console": "off",
+      "no-console": "warn",
       "func-names": "off",
       "object-shorthand": "off",
-      "eqeqeq": "off"
+      "no-underscore-dangle": "off"
     }
 }
