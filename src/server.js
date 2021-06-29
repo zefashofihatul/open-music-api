@@ -19,7 +19,7 @@ const init = async () => {
     },
   });
 
-  // Set routes
+  // Registery Server plugin
   await server.register({
     plugin: songs,
     options: {

@@ -17,6 +17,7 @@
       "no-console": "warn",
       "func-names": "off",
       "object-shorthand": "off",
-      "no-underscore-dangle": "off"
+      "no-underscore-dangle": "off",
+      "camelcase": "off"
     }
 }
