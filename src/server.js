@@ -5,6 +5,7 @@ const Hapi = require('@hapi/hapi');
 const songs = require('./api/songs');
 const SongsService = require('./services/postgres/SongsService');
 const SongsValidator = require('./validator/songs');
+const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
   // Create server
@@ -17,6 +18,21 @@ const init = async () => {
         origin: ['*'],
       },
     },
+  });
+
+  server.ext('onPreResponse', (request, h) => {
+    // Mendapatkan konteks response dari request
+    const { response } = request;
+    if (response instanceof ClientError) {
+      const newResponse = h.response({
+        status: 'fail',
+        message: response.message,
+      });
+      newResponse.code(response.statusCode);
+    }
+
+    // Jka bukan ClientError, lanjutkan dengan response sebelumnya (tanpa intervansi)
+    return response.continue || response;
   });
 
   // Registery Server plugin
