@@ -1,7 +1,8 @@
-const { Pool, Client } = require('pg');
+const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const AuthorizationError = require('../../exceptions/AuthorizationError');
 const { mapDBToModelGetAll, mapDBToModelGetSpecified } = require('../../utils');
 
 class SongsService {
@@ -11,13 +12,13 @@ class SongsService {
 
   // Put your Song services here
 
-  async addSong({ title, year, performer, genre, duration }) {
+  async addSong({ title, year, performer, genre, duration, owner }) {
     const id = `song-${nanoid(16)}`;
     const createdAt = new Date().toISOString();
     const updatedAt = createdAt;
 
     const query = {
-      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
       values: [
         id,
         title,
@@ -27,6 +28,7 @@ class SongsService {
         duration,
         createdAt,
         updatedAt,
+        owner,
       ],
     };
 
@@ -38,8 +40,12 @@ class SongsService {
     return result.rows[0];
   }
 
-  async getSongs() {
-    const result = await this._pool.query('SELECT * FROM songs');
+  async getSongs(owner) {
+    const query = {
+      text: 'SELECT * FROM songs WHERE owner = $1',
+      values: [owner],
+    };
+    const result = await this._pool.query(query);
     return result.rows.map(mapDBToModelGetAll);
   }
 
@@ -77,6 +83,26 @@ class SongsService {
 
     if (!result.rows.length) {
       throw new NotFoundError('Lagu gagal dihapus. Id tidak ditemukan');
+    }
+  }
+
+  async verifySongOwner(id, owner) {
+    const query = {
+      text: 'SELECT * FROM songs WHERE id = $1',
+      values: [id],
+    };
+    const result = await this._pool.query(query);
+    console.log(result.rows);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Lagu tidak ditemukan');
+    }
+
+    const song = result.rows[0];
+    console.log(song.owner);
+
+    if (song.owner !== owner) {
+      throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
     }
   }
 }
