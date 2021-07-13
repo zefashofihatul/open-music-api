@@ -5,8 +5,9 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
-  constructor() {
+  constructor(collaborationsService) {
     this._pool = new Pool();
+    this._collaborationService = collaborationsService;
   }
 
   async addPlaylist({ credentialId, name }) {
@@ -28,6 +29,7 @@ class PlaylistsService {
       values: [credentialId],
     };
     const result = await this._pool.query(query);
+    console.log(credentialId);
     return result.rows;
   }
 
@@ -42,20 +44,33 @@ class PlaylistsService {
     }
   }
 
+  async verifyPlaylistAccess(playlistId, userId) {
+    try {
+      await this.verifyPlaylistOwner(playlistId, userId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      try {
+        await this._collaborationService.verifyCollaborator(playlistId, userId);
+      } catch {
+        throw error;
+      }
+    }
+  }
+
   async verifyPlaylistOwner(id, owner) {
     const query = {
       text: 'SELECT * FROM playlists WHERE id = $1',
       values: [id],
     };
     const result = await this._pool.query(query);
-    console.log(result.rows);
 
     if (!result.rows.length) {
       throw new NotFoundError('Playlist tidak ditemukan');
     }
 
     const playlist = result.rows[0];
-    console.log(playlist.owner);
 
     if (playlist.owner !== owner) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini');

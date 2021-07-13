@@ -87,6 +87,14 @@ class SongsService {
   }
 
   async verifySongOwner(id, owner) {
+    const song = await this.verifySongId(id);
+
+    if (song.owner !== owner) {
+      throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
+    }
+  }
+
+  async verifySongId(id) {
     const query = {
       text: 'SELECT * FROM songs WHERE id = $1',
       values: [id],
@@ -95,15 +103,10 @@ class SongsService {
     console.log(result.rows);
 
     if (!result.rows.length) {
-      throw new NotFoundError('Lagu tidak ditemukan');
+      throw new NotFoundError('Lagu tidak valid');
     }
 
-    const song = result.rows[0];
-    console.log(song.owner);
-
-    if (song.owner !== owner) {
-      throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
-    }
+    return result.rows[0];
   }
 }
 
