@@ -12,13 +12,13 @@ class SongsService {
 
   // Put your Song services here
 
-  async addSong({ title, year, performer, genre, duration, owner }) {
+  async addSong({ title, year, performer, genre, duration }) {
     const id = `song-${nanoid(16)}`;
     const createdAt = new Date().toISOString();
     const updatedAt = createdAt;
 
     const query = {
-      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
+      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
       values: [
         id,
         title,
@@ -28,7 +28,6 @@ class SongsService {
         duration,
         createdAt,
         updatedAt,
-        owner,
       ],
     };
 
@@ -40,10 +39,9 @@ class SongsService {
     return result.rows[0];
   }
 
-  async getSongs(owner) {
+  async getSongs() {
     const query = {
-      text: 'SELECT * FROM songs WHERE owner = $1',
-      values: [owner],
+      text: 'SELECT * FROM songs',
     };
     const result = await this._pool.query(query);
     return result.rows.map(mapDBToModelGetAll);
@@ -103,7 +101,7 @@ class SongsService {
     console.log(result.rows);
 
     if (!result.rows.length) {
-      throw new NotFoundError('Lagu tidak valid');
+      throw new InvariantError('Lagu tidak valid');
     }
 
     return result.rows[0];

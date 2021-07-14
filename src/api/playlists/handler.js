@@ -42,7 +42,7 @@ class PlaylistsHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(400);
+        response.code(error.statusCode);
         console.log(error);
         return response;
       }
@@ -76,7 +76,7 @@ class PlaylistsHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(400);
+        response.code(error.statusCode);
         console.log(error);
         return response;
       }
@@ -114,7 +114,7 @@ class PlaylistsHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(400);
+        response.code(error.statusCode);
         console.log(error);
         return response;
       }
@@ -155,7 +155,7 @@ class PlaylistsHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(400);
+        response.code(error.statusCode);
         console.log(error);
         return response;
       }
@@ -197,7 +197,7 @@ class PlaylistsHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(400);
+        response.code(error.statusCode);
         console.log(error);
         return response;
       }
@@ -239,7 +239,7 @@ class PlaylistsHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(400);
+        response.code(error.statusCode);
         console.log(error);
         return response;
       }
